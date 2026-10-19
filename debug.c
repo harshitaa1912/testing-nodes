@@ -1,0 +1,56 @@
+
+
+#include "common.h"
+
+#if !defined(MLK_CONFIG_MULTILEVEL_NO_SHARED) && defined(MLKEM_DEBUG)
+
+#include <stdio.h>
+#include <stdlib.h>
+#include "debug.h"
+
+#define MLK_DEBUG_ERROR_HEADER "[ERROR:%s:%04d] "
+
+void mlk_debug_check_assert(const char *file, int line, const int val)
+{
+  if (val == 0)
+  {
+    fprintf(stderr, MLK_DEBUG_ERROR_HEADER "Assertion failed (value %d)\n",
+            file, line, val);
+    exit(1);
+  }
+}
+
+void mlk_debug_check_bounds(const char *file, int line, const int16_t *ptr,
+                            unsigned len, int lower_bound_exclusive,
+                            int upper_bound_exclusive)
+{
+  int err = 0;
+  unsigned i;
+  for (i = 0; i < len; i++)
+  {
+    int16_t val = ptr[i];
+    if (!(val > lower_bound_exclusive && val < upper_bound_exclusive))
+    {
+      fprintf(
+          stderr,
+          MLK_DEBUG_ERROR_HEADER
+          "Bounds assertion failed: Index %u, value %d out of bounds (%d,%d)\n",
+          file, line, i, (int)val, lower_bound_exclusive,
+          upper_bound_exclusive);
+      err = 1;
+    }
+  }
+
+  if (err == 1)
+  {
+    exit(1);
+  }
+}
+
+#else
+
+MLK_EMPTY_CU(debug)
+
+#endif
+
+#undef MLK_DEBUG_ERROR_HEADER
